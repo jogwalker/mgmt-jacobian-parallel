@@ -1,10 +1,12 @@
 #!/bin/bash
 
 #PBS -N mgmt-jacobian
-#PBS -j oe job_reports/
-#PBS -m abe
+#PBS -o job_reports/output
+#PBS -e job_reports/error
 #PBS -t 1-10
 #PBS -l walltime=00:01:00
+
+# PBS -m abe
 
 set -e
 
