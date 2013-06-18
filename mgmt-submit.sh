@@ -1,8 +1,10 @@
 #!/bin/bash
 
-#PBS -N test
-#PBS -j oe
+#PBS -N mgmt-jacobian
+#PBS -j oe job_reports/
+#PBS -m abe
 #PBS -t 1-10
+#PBS -l walltime=00:01:00
 
 set -e
 
@@ -13,4 +15,6 @@ fi
 
 i=${PBS_ARRAYID}
 
-R --no-save --args ${i} < ~/mgmt-jacobian-parallel/mgmt-run.R
+outdir="~/mgmt-jacobian-parallel/results"
+
+R --no-save --args ${outdir} ${i} < ~/mgmt-jacobian-parallel/mgmt-run.R
