@@ -3,8 +3,8 @@
 #PBS -N mgmt-jacobian
 #PBS -o job_reports/output
 #PBS -e job_reports/error
-#PBS -t 1-10
-#PBS -l walltime=00:01:00
+#PBS -t 1-1000
+#PBS -l walltime=01:00:00
 
 # PBS -m abe
 
@@ -17,6 +17,6 @@ fi
 
 i=${PBS_ARRAYID}
 
-outdir="~/mgmt-jacobian-parallel/results"
+outdir="~/mgmt-jacobian-parallel/results/"
 
 R --no-save --args ${outdir} ${i} < ~/mgmt-jacobian-parallel/mgmt-run.R

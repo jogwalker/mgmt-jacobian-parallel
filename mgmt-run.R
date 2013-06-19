@@ -40,7 +40,8 @@ if (length(stable.ind > 0)) {
 filename1 <- paste(outdir,"mat_stable_",jid,".Rdata",sep="")
 filename2 <- paste(outdir,"mat_neginverse_",jid,".Rdata",sep="")
 # filename3 <- paste(outdir,"mat_fenced_",jid,".Rdata",sep="")
-save(list(mat.all,stable), file=filename1)
+out <- list(mat.all,stable)
+save(out, file=filename1)
 save(inverses,file=filename2)
 # save(fenced,file=filename3)
 
