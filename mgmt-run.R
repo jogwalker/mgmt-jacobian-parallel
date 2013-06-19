@@ -27,7 +27,7 @@ stable.ind <- which(stable==TRUE)
 
 if (length(stable.ind > 0)) {
   for (i in 1:sum(stable)) {
-    mat <- mat.all[stable.ind[i]]
+    mat <- mat.all[,,stable.ind[i]]
     inverses[,,i] <- invertMatrix(mat)
   }
 }
