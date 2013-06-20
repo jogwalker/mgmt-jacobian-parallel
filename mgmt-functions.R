@@ -7,11 +7,7 @@ createMatrix <- function(network) {
   
   # initialize array and make class indices
   mat <- matrix(NA,nrow(network),ncol(network)) 
-  classes <- unique(as.character(network))
-  index <- list()
-  for (i in 1:length(classes)) {
-    index[[classes[i]]] <- network==classes[i]
-  }
+  index <- makeIndex(network)
   
   # fill in mat with simulated parameter values
   mat[index$ab] <- rgamma(sum(index$ab),shape=0.5,scale=1)
@@ -77,7 +73,31 @@ invertMatrix <- function(matrix,neg=FALSE) {
 
 ##################################
 
-# buildFence <- function(matrix) {
+# make indices for classes from the network
+
+makeIndex <- function(network) {
+  classes <- unique(as.character(network))
+  index <- list()
+  for (i in 1:length(classes)) {
+    index[[classes[i]]] <- network==classes[i]
+  }
+  return(index)
+}
+
+
+##################################
+
+# buildFence <- function(prop.conserved,fence.efficacy,matrix,network) {
+#   index <- makeIndex(network)
+#   nodes <- rownames(network)
+#   mat <- matrix
+#   pw <- prop.conserved
+#   pd <- 1-pw
+#   f <- fence.efficacy # assumes same efficacy for all nodes
+#   
+#   #
+#   
+#   # increases density 
 #   
 #   
 # }

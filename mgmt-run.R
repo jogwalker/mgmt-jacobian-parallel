@@ -12,36 +12,33 @@ load("~/mgmt-jacobian-parallel/network.rdata")
 # run simulations
 set.seed(jid)
 
-n <- 10000
-
-mat.all <- array(dim=c(dim(network),n))
-stable <- vector(length=n)
+n <- 100000
+mat.stable <- list()
+count <- 0
 
 for (i in 1:n) {
-  mat.all[,,i] <- createMatrix(network)
-  stable[i] <- filterMatrix(mat.all[,,i])
-}
-
-# save stable ones
-mat.filtered <- mat.all[,,stable]
-
-inverses <- array(dim=c(dim(network),sum(stable)))
-stable.ind <- which(stable==TRUE)
-
-if (length(stable.ind > 0)) {
-  for (i in 1:sum(stable)) {
-    mat <- mat.all[,,stable.ind[i]]
-    inverses[,,i] <- invertMatrix(mat)
+  mat <- createMatrix(network)
+  stable <- filterMatrix(mat)
+  if (stable==TRUE) {
+    count <- count+1
+    mat.stable[[count]] <- mat
   }
 }
 
+# save stable ones as array instead of list
+mat.filtered <- array(unlist(mat.stable),dim=c(dim(network),length(mat.stable)))
 
-# simulate the fence
-# fenced <- buildFence(filtered)
+inverses <- array(NA,dim=dim(mat.filtered))
+
+if (count > 0)) {
+  for (i in 1:dim(mat.filtered)[3]) {
+    inverses[,,i] <- invertMatrix(mat.filtered[,,i])
+  }
+}
 
 # write output files
 filename1 <- paste(outdir,"mat_stable_",jid,".Rdata",sep="")
-filename2 <- paste(outdir,"mat_neginverse_",jid,".Rdata",sep="")
+filename2 <- paste(outdir,"mat_inverse_",jid,".Rdata",sep="")
 # filename3 <- paste(outdir,"mat_fenced_",jid,".Rdata",sep="")
 save(mat.filtered, file=filename1)
 save(inverses,file=filename2)

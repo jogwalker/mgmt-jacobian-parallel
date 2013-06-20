@@ -3,8 +3,8 @@
 #PBS -N mgmt-jacobian
 #PBS -o job_reports/output
 #PBS -e job_reports/error
-#PBS -t 1-1000
-#PBS -l walltime=01:00:00
+#PBS -t 1-100
+#PBS -l walltime=05:00:00
 
 # PBS -m abe
 
