@@ -25,22 +25,23 @@ for (i in 1:n) {
   }
 }
 
-# save stable ones as array instead of list
-mat.filtered <- array(unlist(mat.stable),dim=c(dim(network),length(mat.stable)))
-
-inverses <- array(NA,dim=dim(mat.filtered))
+# only proceed if any are stable 
 
 if (count > 0) {
+  mat.filtered <- array(unlist(mat.stable),dim=c(dim(network),length(mat.stable)))
+  
+  inverses <- array(NA,dim=dim(mat.filtered))
+  
   for (i in 1:dim(mat.filtered)[3]) {
     inverses[,,i] <- invertMatrix(mat.filtered[,,i])
   }
+  
+  # write output files
+  filename1 <- paste(outdir,"mat_stable_",jid,".Rdata",sep="")
+  filename2 <- paste(outdir,"mat_inverse_",jid,".Rdata",sep="")
+  save(mat.filtered, file=filename1)
+  save(inverses,file=filename2)
 }
 
-# write output files
-filename1 <- paste(outdir,"mat_stable_",jid,".Rdata",sep="")
-filename2 <- paste(outdir,"mat_inverse_",jid,".Rdata",sep="")
-# filename3 <- paste(outdir,"mat_fenced_",jid,".Rdata",sep="")
-save(mat.filtered, file=filename1)
-save(inverses,file=filename2)
-# save(fenced,file=filename3)
+
 
