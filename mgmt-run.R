@@ -13,7 +13,7 @@ load("~/mgmt-jacobian-parallel/network.rdata")
 set.seed(jid)
 
 # load n
-load("/mgmt-jacobian-parallel/n.rdata")
+load("~/mgmt-jacobian-parallel/n.rdata")
 mat.stable <- list()
 count <- 0
 

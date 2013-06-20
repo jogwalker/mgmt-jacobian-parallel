@@ -19,8 +19,8 @@ mat.count <- 0
 
 for (i in 1:r) {
   
-  filename.m <- paste("~/mgmt-jacobian-parallel/results/mat_stable_",i,".Rdata",sep="")
-  filename.i <- paste("~/mgmt-jacobian-parallel/results/mat_inverse_",i,".Rdata",sep="")
+  filename.m <- paste("~/mgmt-jacobian-parallel/results/mat_stable_",i+100,".Rdata",sep="")
+  filename.i <- paste("~/mgmt-jacobian-parallel/results/mat_inverse_",i+100,".Rdata",sep="")
   
   if(file.exists(filename.i)) {
     count <- count+1
