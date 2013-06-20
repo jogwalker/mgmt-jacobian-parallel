@@ -7,6 +7,7 @@
 
 set -e
 
-outdir="~/mgmt-jacobian-parallel/results/"
+outdir="~/mgmt-jacobian-parallel/analysis/"
+njobs <- 100
 
-R --no-save --args ${outdir} < ~/mgmt-jacobian-parallel/mgmt-analysis.R
+R --no-save --args ${outdir} ${njobs} < ~/mgmt-jacobian-parallel/mgmt-analysis.R
