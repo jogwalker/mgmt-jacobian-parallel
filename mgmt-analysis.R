@@ -1,17 +1,15 @@
 args <- commandArgs(T)
 
 outdir <- args[1]
-n <- as.numeric(args[2])
-r <- as.numeric(args[3])
+r <- as.numeric(args[2])
 date <- Sys.Date()
-print(n)
-print(r)
 
 # read in the necessary functions
 source("~/mgmt-jacobian-parallel/mgmt-functions.R")
 
 # load network data
 load("~/mgmt-jacobian-parallel/network.rdata")
+load("~/mgmt-jacobian-parallel/n.rdata")
 
 # read in matrices 
 stable <- list()
@@ -19,7 +17,7 @@ inverse <- list()
 count <- 0
 mat.count <- 0
 
-for (i in 1:n) {
+for (i in 1:r) {
   
   filename.m <- paste("~/mgmt-jacobian-parallel/results/mat_stable_",i,".Rdata",sep="")
   filename.i <- paste("~/mgmt-jacobian-parallel/results/mat_inverse_",i,".Rdata",sep="")
@@ -48,7 +46,7 @@ save(mat.all,file=filename.save1)
 # create summary 
 summary <- list()
 summary[["success"]] <- mat.count
-summary[["n"]] <- n*r
+summary[["nsims"]] <- n*r
 save(summary, file=paste(outdir,"summary_",date,".Rdata",sep=""))
 
 

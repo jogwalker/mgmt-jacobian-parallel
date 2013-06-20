@@ -12,7 +12,8 @@ load("~/mgmt-jacobian-parallel/network.rdata")
 # run simulations
 set.seed(jid)
 
-n <- 100000
+# load n
+load("/mgmt-jacobian-parallel/n.rdata")
 mat.stable <- list()
 count <- 0
 
