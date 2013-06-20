@@ -5,8 +5,6 @@
 set -e 
 
 cd ~/mgmt-jacobian-parallel/results
-tar cvf ~/mgmt-jacobian-parallel/stable.tar *stable*
-tar cvf ~/mgmt-jacobian-parallel/inverses.tar *inverse*
 rm *
 
 cd ~/mgmt-jacobian-parallel/job_reports
