@@ -22,6 +22,9 @@ for (i in 1:n) {
   stable[i] <- filterMatrix(mat.all[,,i])
 }
 
+# save stable ones
+mat.filtered <- mat.all[,,stable]
+
 inverses <- array(dim=c(dim(network),sum(stable)))
 stable.ind <- which(stable==TRUE)
 
@@ -40,8 +43,7 @@ if (length(stable.ind > 0)) {
 filename1 <- paste(outdir,"mat_stable_",jid,".Rdata",sep="")
 filename2 <- paste(outdir,"mat_neginverse_",jid,".Rdata",sep="")
 # filename3 <- paste(outdir,"mat_fenced_",jid,".Rdata",sep="")
-out <- list(mat.all,stable)
-save(out, file=filename1)
+save(mat.filtered, file=filename1)
 save(inverses,file=filename2)
 # save(fenced,file=filename3)
 
