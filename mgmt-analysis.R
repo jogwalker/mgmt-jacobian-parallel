@@ -1,9 +1,11 @@
 args <- commandArgs(T)
 
 outdir <- args[1]
-n <- args[2]
-r <- args[3]
+n <- as.numeric(args[2])
+r <- as.numeric(args[3])
 date <- Sys.Date()
+print(n)
+print(r)
 
 # read in the necessary functions
 source("~/mgmt-jacobian-parallel/mgmt-functions.R")
@@ -36,8 +38,8 @@ for (i in 1:n) {
 
 # save data in one file
 
-mat.filtered <- array(unlist(stable),dim=c(dim(network),mat.count)))
-mat.inverses <- array(unlist(inverse),dim=c(dim(network),mat.count)))
+mat.filtered <- array(unlist(stable),dim=c(dim(network),mat.count))
+mat.inverses <- array(unlist(inverse),dim=c(dim(network),mat.count))
 
 mat.all <- list(mat.filtered=mat.filtered,mat.inverses=mat.inverses)
 filename.save1 <- paste(outdir,"mat_all_",date,".Rdata",sep="")
