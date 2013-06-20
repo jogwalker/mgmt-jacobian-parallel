@@ -30,7 +30,7 @@ mat.filtered <- array(unlist(mat.stable),dim=c(dim(network),length(mat.stable)))
 
 inverses <- array(NA,dim=dim(mat.filtered))
 
-if (count > 0)) {
+if (count > 0) {
   for (i in 1:dim(mat.filtered)[3]) {
     inverses[,,i] <- invertMatrix(mat.filtered[,,i])
   }
