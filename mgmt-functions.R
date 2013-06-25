@@ -60,7 +60,7 @@ filterMatrix <- function(matrix) {
 ###################################
 
 # find inverse of the matrix (negative or positive)
-invertMatrix <- function(matrix,neg=FALSE) {
+invertMatrix <- function(matrix,neg=TRUE) {
   ifelse(
     neg==TRUE,
     inverted <- -solve(matrix),
@@ -84,20 +84,77 @@ makeIndex <- function(network) {
   return(index)
 }
 
+##################################
+# create template to fill for each management strategy
+pressTemplate <- function(network) {
+  press.template <- data.frame(matrix(nrow=nrow(network),ncol=15))
+  rownames(press.template) <- rownames(network)
+  names(press.template) <- c("node","numsims","increase","decrease","nochange","pq0","pq25","pq50","pq75","pq100","nq0","nq25","nq50","nq75","nq100")
+  press.template$node <- c("Water","Grass","Trees","Crops","Domestic Ruminants","Domestic Equids","Wild Ruminants","Wild Equids","Parasites of Dom. Equids","Parasites of Wild Equids","Parasites of Dom. Ruminants","Parasites of Wild Ruminants","Infectious Equid Parasites","Infectious Ruminant Parasites","Carnivores","Elephants","People")
+  return(press.template)
+}
 
 ##################################
+# create data.frame with results of a particular press perturbation
+calcPress <- function(pressednodes,sign,mat.inverses,network) {
+  ms <- mat.inverses
+  # if decrease, change sign
+  ifelse(sign=="decrease",
+    ms <- mat.inverses*(-1),
+    ms <- mat.inverses
+  )
+  # subset columns of press perturbed
+  n <- dim(ms)[3]
+  cols <- match(pressednodes,colnames(network))
+  ms <- ms[,cols,]
+  # sum effect if multiple pressed
+  if(length(dim(ms))==3) {
+    ms <- apply(ms,c(1,3),sum)
+  }
+  # make indices for positive, negative, zero
+  ind <- makeInd(ms)
+  # summarize results
+  result <- pressTemplate(network)
+  result$numsims <- n
+  result$increase <- apply(ind$p,1,sum)/n
+  result$decrease <- apply(ind$n,1,sum)/n
+  result$nochange <- apply(ind$z,1,sum)/n
+  result[,c("pq0","pq25","pq50","pq75","pq100")] <- t(apply(
+    ms, 1, function(x){
+    quantile(x[x>0])
+  }))
+  result[,c("nq0","nq25","nq50","nq75","nq100")] <- t(apply(
+    ms, 1, function(x){
+      quantile(x[x<0])
+    }))
+  return(result)
+}
 
-# buildFence <- function(prop.conserved,fence.efficacy,matrix,network) {
-#   index <- makeIndex(network)
-#   nodes <- rownames(network)
-#   mat <- matrix
-#   pw <- prop.conserved
-#   pd <- 1-pw
-#   f <- fence.efficacy # assumes same efficacy for all nodes
-#   
-#   #
-#   
-#   # increases density 
-#   
-#   
-# }
+# make index of positive, negative, zero
+makeInd <- function(x) {
+  ind <- list()
+  ind$p <- matrix(FALSE,nrow=nrow(x),ncol=ncol(x))
+  ind$n <- ind$p
+  ind$z <- ind$p
+  
+  ind$p[which(x>0)] <- TRUE
+  ind$n[which(x<0)] <- TRUE
+  ind$z[which(x==0)] <- TRUE
+  return(ind)
+}
+
+
+buildFence <- function(prop.conserved,fence.efficacy,matrix,network) {
+  # index <- makeIndex(network)
+  nodes <- rownames(network)
+  mat <- matrix
+  pw <- prop.conserved
+  pd <- 1-pw
+  f <- fence.efficacy # assumes same efficacy for all nodes
+  
+  #
+  
+  # increases density 
+  
+  
+}
