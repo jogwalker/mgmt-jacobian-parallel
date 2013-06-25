@@ -130,6 +130,8 @@ calcPress <- function(pressednodes,sign,mat.inverses,network) {
   return(result)
 }
 
+####################################
+
 # make index of positive, negative, zero
 makeInd <- function(x) {
   ind <- list()
@@ -143,18 +145,30 @@ makeInd <- function(x) {
   return(ind)
 }
 
+###################################
 
 buildFence <- function(prop.conserved,fence.efficacy,matrix,network) {
-  # index <- makeIndex(network)
   nodes <- rownames(network)
   mat <- matrix
   pw <- prop.conserved
   pd <- 1-pw
   f <- fence.efficacy # assumes same efficacy for all nodes
+  w.nodes <- c("wild_rum","wild_eq","carnivores","elephants")
+  d.nodes <- c("dom_rum","dom_eq","people","crops")
   
-  #
+  # reduce interactions between w.nodes and d.nodes by f
+  for (i in 1:length(nodes)) { # rows
+    for (j in 1:length(nodes)) { # columns
+        if (nodes[i] %in% w.nodes & nodes[j] %in% d.nodes) {
+          mat[i,j] <- mat[i,j]*(1-f)
+          mat[j,i] <- mat[i,j]*(1-f)
+        }
+      }
+    }
+  }
   
-  # increases density 
-  
-  
+  # scale interactions with infectious parasites by f and pw,pd?
+
+  # increases density - would building fence increase density? 
+  return(mat)
 }
