@@ -104,7 +104,6 @@ for (i in 1:dim(mat.filtered)[3]) {
     mat.inverses.f[,,i] <- NA
     unstable.f[i] <- TRUE
   }  
-  )
 }
 
 # compare difference...save
