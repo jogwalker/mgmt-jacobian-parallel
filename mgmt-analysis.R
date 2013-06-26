@@ -110,7 +110,7 @@ for (i in 1:dim(mat.filtered)[3]) {
 mat.inverses.f.s <- mat.inverses.f[,,which(unstable.f==FALSE)]
 dims <- list(dim.mat.fenced=dim(mat.fenced),dim.mat.inverses.f.s=dim(mat.inverses.f.s))
 mat.all.fenced <- list(dims=dims,mat.fenced=mat.fenced,mat.inverses.f.s=mat.inverses.f.s)
-save(mat.all,file=paste(outdir,"mat_all_fenced_",date,".Rdata",sep=""))
+save(mat.all.fenced,file=paste(outdir,"mat_all_fenced_",date,".Rdata",sep=""))
 
 # STRATEGY 1: Decrease parasites in domestic ruminants
 strat1f <- calcPress(nodes1,sign1,mat.inverses.f.s,network)
