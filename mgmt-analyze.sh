@@ -9,6 +9,6 @@ set -e
 
 outdir="~/mgmt-jacobian-parallel/analysis/"
 njobs=100
-njobsstart=101
+njobsstart=1
 
 R --no-save --args ${outdir} ${njobs} ${njobsstart} < ~/mgmt-jacobian-parallel/mgmt-analysis.R
