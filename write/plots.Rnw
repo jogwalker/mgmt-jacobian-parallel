@@ -1,3 +1,5 @@
+%%% make plots, then print them with reasonable ones together on the page
+
 
 
 
