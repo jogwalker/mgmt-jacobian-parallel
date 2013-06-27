@@ -1,0 +1,202 @@
+% rewriting from 27 June 2013 - copied file over from write directory
+
+\documentclass[12pt]{article} % Default font size is 12pt, it can be changed here
+
+\usepackage{geometry} % Required to change the page size to A4
+\geometry{a4paper} % Set the page size to be A4 as opposed to the default US Letter
+\usepackage{natbib}
+\bibpunct{(}{)}{;}{a}{,}{,}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{rotating}
+\usepackage{adjustbox}
+\usepackage{array}
+
+\newcolumntype{R}[1]{%
+    >{\adjustbox{angle=#1}\bgroup}%
+    l%
+    <{\egroup}%
+}
+\newcommand*\rot{\multicolumn{1}{R{90}}}% no optional argument here, please!
+
+
+\begin{document}
+
+\title{Project 2: Optimal Management}
+\author{Josephine Walker}
+\maketitle
+
+\section*{Collaborators}
+\begin{itemize}
+  \item Michael Bode (UMelb)
+  \item Hugh Possingham (UQ)
+  \item Peter Baxter (UQ)
+\end{itemize}
+
+
+\section{Introduction}
+
+Communities at the border of Makgadikgadi Pans National Park in Botswana make up part of a social-ecological system which includes people, domestic animals, wild animals, parasites, plants, and other organisms. People interact with the rest of the system by raising livestock, planting crops, and applying management strategies such as building fences, using pesticides, or digging wells. At this point, decisions on the best methods for management are generally not based on economic outcomes. The goal of this project is to develop a way to conduct cost-benefit analyses for various management strategies that incorporates impacts for multiple players in the system - including conservation and tourism as well as livelihoods of the local people. The method I am currently using is called `qualitative modeling' and is based on \citet{Raymond2011, Dambacher2003}. The idea is to simulate an ecosystem and calculate the effect of increasing or decreasing certain populations and see what the new equilibrium will be. This is known as a press perturbation \citep{Bender1984}.
+
+The first step is to develop a network model of the ecosystem based on Lotka-Volterra interactions, incorporating uncertain links. Next, I subject simulations of this network to combinations of press perturbations which represent management strategies. The results of the press perturbations indicate whether certain nodes in the network are likely to increase or decrease following the perturbation. I plan to conduct interviews with communities and government officials in Botswana to estimate how certain aspects of the system or certain nodes are valued compared to others. I will then incorporate these results into cost-benefit equations that incorporate implications for conservation as well as the needs of the communities. In this way, management strategies can be compared based on their predicted cost-benefit ratio, as well as the uncertainty of the outcome for each node. 
+ 
+
+
+\section{Methods}
+
+\subsection{Defining a network}
+
+The network model is defined by linked Lotka-Volterra-type equations. This can be written as a system of differential equations as defined by Hosack, Hayes and Dambacher:
+
+\[\frac{dX_{i}}{dt} = f_{i}(X_{1},...,X_{n}; p_{1},...,p_{k})\] \[i = 1...n, k = 1...m \]
+
+where \emph{m} parameters $p_{k}$ control the rates of increase or decrease within each growth function $f_{i}$ \citep{Hosack2008}. 
+
+For example, for $n=2$ the equations could look like this:
+
+\[\frac{dX_{1}}{dt} = f_{1}(X_{1},X_{2}; p_{1},p_{2}) = p_{1}X_{1} - p_{2}X_{1}X_{2}\]
+\[\frac{dX_{2}}{dt} = f_{2}(X_{1},X_{2}; p_{3},p_{4}) = p_{3}X_{2} - p_{4}X_{2}X_{1}\]
+
+The system is linearized by evaluating the first partial derivatives of the growth functions $f_{i}$ with respect to each $X_{j}$ at equilibrium, this makes up the $n\times n$ Jacobian matrix \textbf{A}.
+
+Each element of \textbf{A}, $a_{ij}$, therefore represents the effect of changes in $X_{j}$ (the node in the column) on $X_{i}$ (the node in the row), and can be written, as in \citep{Hosack2008}, as
+
+\[ a_{ij} = \left. \frac{\partial f_{i}}{\partial X_{j}} \right | _{*} \]  where * denotes evaluation at equilibrium. 
+
+%\paragraph{}
+The values of each individual parameter $p_{k}$ in the Lotka-Volterra equations or each $a_{ij}$ in \textbf{A} are not known, but the results of the model are likely to be highly sensitive to the values chosen \citep{Hosack2008}. Instead of defining values, I defined the biological class of interaction for each cell in the matrix (for example: predator, prey, competition) in order to decide whether $a_{ij}$ will be positive or negative  (Table \ref{tab:network}). This is one sense in which the model is 'qualitative'.
+
+<<setup, cache=TRUE,echo=FALSE,results='hide'>>=
+require(xtable)
+load("C:/Users/Josephine/Dropbox/Dropbox Documents/Bristol_PhD/R/write/network.rdata")
+netmat <- network
+rownames(network) <- c("Water","Grass","Trees","Crops","Domestic Ruminants","Domestic Equids","Wild Ruminants","Wild Equids", "Parasites Dom Eq","Parasites Wild Eq","Parasites Dom Rum", "Parasites Wild Rum","Infectious Eq Par","Infectious Rum Par", "Carnivores","Elephants","People")
+colnames(network) <- rownames(network)
+colnames(network) <- paste("\\rot{", colnames(network), "}", sep="")
+@
+
+% # <<another-table, cache=TRUE,echo=FALSE,results='hide', warning=FALSE>>=
+% # # gib's fun colorful thing
+% # 
+% # require(ggplot2, quietly=TRUE)
+% # require(reshape2. quietly=TRUE)
+% # a <- melt(netmat)
+% # levels(a$value) <- c("Abiotic", "Competition", "Density dependent", "Incidental", "Mutualistic", "None",
+% # "Predator", "Prey", "Unknown")
+% # temp <- as.character(unique(a$Var1))
+% # a$Var1 <- factor(a$Var1, levels=temp)
+% # a$Var2 <- factor(a$Var2, levels=temp)
+% # ggplot(a, aes(x=1, y=1, fill=value)) + geom_tile() + scale_fill_brewer(type="qual",palette="Set3") + facet_grid(Var1 ~ Var2) 
+% # 
+% # @
+
+<<methods-1, cache=TRUE, results='asis',echo=FALSE >>=
+print(xtable(network, caption="Defined interactions between nodes; ab = abiotic/incidental increase, uk = unknown, mu = mutualistic, pr = predator, py = prey, co = competition, dd = density-dependent (diagonal), na = none, in = incidental reduction", label="tab:network"), size="footnotesize", #include.colnames=FALSE,
+      sanitize.colnames.function = identity,
+      floating.environment="sidewaystable")
+@
+
+I defined the model to have 17 nodes representing relevant groups of organisms in the system, including separating parasites into infective and within-host stages. Each possible interaction is defined as one of nine possible classes representing combinations of positive, negative, and no interactions between two nodes:
+
+\begin{itemize}
+\item \textbf{ab}, an abiotic or unidirectional increase, such as the effect water has on everything, $a_{ji}$ is 0
+\item \textbf{uk}, unknown, could be positive or negative or no link
+\item \textbf{mu}, mutualistic, positive impact and $a_{ji}$ is also positive 
+\item \textbf{pr}, predator, negative impact and $a_{ji}$ is positive (prey)
+\item \textbf{py}, prey, positive impact and $a_{ji}$ is negative (predator)
+\item \textbf{co}, competition, negative impact and $a_{ji}$ is also negative
+\item \textbf{dd}, density-dependent, negative impact through competition, but only on the diagonal indicating the effect of a node on itself
+\item \textbf{na}, no interaction
+\item \textbf{in}, unidirectional decrease, where $a_{ji}$ is 0
+\end{itemize}
+
+This is based on the approach taken by \citet{Raymond2011} in their assessment of the impact of eradication of invasive species on Macquarie Island. They define their network in a similar manner and go on to simulate values for each $a_{ij}$. First, in order to deal with unknown links, they look at each possible combination of \emph{x} unknown links existing or not ($2^{x}$), and simulate 1000 Lyapunov stable (stable around equilibrium, all real parts of eigenvalues are negative) values for \textbf{A} for each combination, resulting in 131 million matrices. Lyapunov stability indicates that the equilibrium point is locally stable such that the abundance of each node is positive; in other words, unstable systems are extinction prone. In addition, the determinant of the matrix must be negative, because a system with a positive determinant is unstable, and a zero determinant means the matrix is singular (non-invertible) and `neutrally stable'. Neutral stability means there is no local attractor so instead of having a stable equilibrium the system is controlled by exogenous input and will have multiple solutions \citep{Dambacher2002}.
+
+Instead of taking the approach  of \citet{Raymond2011}, which leads to equal weighting of each combination regardless of the likelihood of that combination yielding a stable matrix, I simulate values so that each unknown has an equal probability of being negative, zero, or positive. Various changes to how each $a_{ij}$ is chosen makes it more or less likely that a simulated \textbf{A} will be stable, but in general many iterations are necessary to reach a large number of stable simulations (25+ unstable matrices generated per stable matrix). At the moment all random values $a_{ij}$ are drawn from a uniform distribution, with $|a_{ij}| < 1$. 
+
+\citet{Raymond2011} also use additional selection criteria besides stability to narrow down their modelled matrices. These criteria are based on what they know happened when cats were removed from the island. At the moment I don't have any known responses to check my networks against.
+
+
+\subsection{Press perturbations on a network}
+
+A press perturbation on a network is a sustained change in a parameter that shifts the system to a new equilibrium \citep{Hosack2008}. The new equilibrium point will have new average values for each variable. This is calculated by taking the negative inverse matrix $-\mathbf{A}^{-1}$, which represents sustained positive input to a variable, such as an increase in the birth rate or decrease in death rate \citep{Dambacher2002}. For a negative change to a node the signs are reversed. In this matrix, the effect of a change in node \emph{j} is read down the columns, and the response of node \emph{i} is read along the rows. The inverse matrix is used because each of the inverse terms $a_{ij}^{-1}$ is a function of all of the elements in \textbf{A} and thus accounts for the total effect that node \emph{j} has on node \emph{i}, both direct and indirect through all possible paths \citep{Bender1984}. The effect of pressing multiple nodes at once can be calculated by summing the columns for those nodes \citep{Raymond2011}.
+
+\citet{Dambacher2002} describe how to calculate a weighted feedback matrix which shows how the structure of the network contributes to uncertainty of the sign of the result of a press perturbation. I may calculate weighted feedback matrices for my simulated matrices in order to determine the effect of structure since I don't explicitly model each possible structure as \citet{Raymond2011} do.
+
+\subsection{Incorporating management strategies}
+
+There are several management strategies that I want to explore the effect of. The simplest to implement would be the effect of reducing parasites in domestic animals. Next, I want to think about what kind of perturbations a fence would cause. Because it primarily reduces contact, it is easier to think about it as changing the interactions in the community matrix \textbf{A} so I will have to think more about how this will translate to a press perturbation. Because $a_{ij}$ depends on $f_{i}$ which depends on $p$ (the interaction terms between nodes) I think this will make sense mathematically \citep{Dambacher2002}. I also want to look at what happens when tourism is included in the system. I will build in tourists as an additional node in the system and compare the results of simulated press perturbations. In essence, tourists will have a positive benefit on the community, and will be positively affected by the presence of wildlife. 
+
+\subsection{Cost-benefit analysis and utility functions}
+
+The effect of each management strategy on the network will be calculated by summing the cost or benefit of the changes in each node based on utility functions that I will estimate from field work talking to communities and government officials in Botswana. I plan to have the code all set up and ready to go with dummy utility functions before I leave Australia so that I can make the necessary changes after my trip to Botswana to get the final results. 
+
+For the next few weeks I will be doing a part time online course in Applied Economic Modelling for Animal Health which will be helpful for this part of the project.
+
+\subsection{Differences between communities}
+
+McDermott describes how the economics of rural livestock production depend on the degree of intensification of the system as well as the degree of importance of livestock to an individual household economy \citep{McDermott1999}. In this case, I think that the level of intensification is likely to be similar across villages as most use a very low-input method of raising livestock (letting them graze wherever they want). Instead, in this context the degree of interaction with wildlife will be important. I have made a figure which represents where hypothetical farmers would fall on these spectra (Figure \ref{fig:economic_axes}). 
+
+\begin{figure}[ht]
+\centering
+\includegraphics[scale=0.9]{economic_axes}
+\caption{Hypothetical spectra representing differences between farmers or communities}
+\label{fig:economic_axes}
+\end{figure}
+
+
+In practice, I think I can incorporate this issue into the model by comparing a few subsets of simulated models where some defined interaction factor is high/med/low. I have not thought much about this yet, but perhaps I can subset the simulated networks by using cutoffs for strength of links between domestic and wild animals. For example, simulated networks with highly competitive interactions between domestic and wild grazers, and/or with high levels of predation of domestic animals by wild carnivores, would fall into the high interaction category. This could be subsetted from all simulated networks or new networks could be simulated with these additional constraints. 
+
+
+The goal of dividing communities by level of interaction would be to compare how these differences affect the recommended management strategy from the perspective of a particular community. In addition, it will be useful to define whether individual communities may be affected differently by the same management strategy.
+
+\subsection{Limitations and some other possible methods}
+
+The qualitative modeling method defines a framework for assessment of the economic impact of a management strategy based on the modeled structure of the system. By simulating many possible networks, we incorporate the high levels of uncertainty about the model structure. Essentially, everything is highly uncertain and yet we try to make conclusions anyway. By using a complex model, there are so many parameters to be defined and this contributes to the uncertainty. I have thought a little bit about whether it would be possible to use a simpler model. 
+
+
+From what I have seen, there is only one study which attempts to economically examine the impact of wildlife contact on communities \citep{Chaminuka2012}. They do an analysis which incorporates potential costs and benefits to communities of living near the park, but they don't consider the impact of humans on the wildlife or of the impact of different management strategies. I could use a similar method with additional factors included and estimate parameters based on expert opinion instead of using simulated networks. 
+
+
+Another study explicitly models wildebeest population growth in relation to poaching pressure by communities in order to determine the risk of collapse of the wildebeest population under different management strategies \citep{Barrett1998}. I could potentially do something similar to this, where I focus on transmission of parasites between domestic and wild populations using fairly simple population growth models (with competition just between two species) which would be possible to parameterize explicitly. This would allow me to estimate costs and benefits of parasite management but would neglect many interactions and effects.
+
+
+\section{Preliminary Results}
+
+I simulated 100,000 matrices, of which 4089 were stable. Using these stable matrices, I was able to examine the effect of press perturbations. As a first pass, I have looked at the effect of reducing domestic ruminant parasites, domestic equid parasites, and both (Figures \ref{fig:rum},\ref{fig:eq},\ref{fig:both}). The plots indicate the proportion of the simulated networks in which the press perturbation resulted in a positive or negative response for each node (there are essentially no zero responses). 
+
+Suppressing ruminant parasites results in a high level of confidence for an increase in domestic ruminants, and less confidence in an increase in people, elephants, and carnivores. The infectious stage of ruminant parasites is likely to go down, but the effect on wild ruminants and domestic equids is equivocal. There is a small chance that wild equids will decrease. 
+
+\begin{figure}[p]
+\centering
+\includegraphics[scale=0.6]{par_rum_dom}
+\caption{The impact of a negative press perturbation on parasites of domestic ruminants. Dark grey = positive response; light grey = negative response}
+\label{fig:rum}
+\end{figure}
+
+Suppressing equid parasites has an analogous effect to suppressing ruminant parasites. It results in a high level of confidence for an increase in domestic equids, and less confidence in an increase in people, elephants, and carnivores. The infectious stage of equid parasites is likely to go down, but the effect on wild equids and domestic ruminants is equivocal. There is a small chance that wild equids will decrease. 
+
+\begin{figure}[p]
+\centering
+\includegraphics[scale=0.5]{pareqdom}
+\caption{The impact of a negative press perturbation on parasites of domestic equids. Dark grey = positive response; light grey = negative response}
+\label{fig:eq}
+\end{figure}
+
+When parasites of both domestic and wild ruminants are suppressed together, people, elephants, and carnivores still do well. Domestic equids and ruminants both usually increase but the proportion drops from about 85\% to just over 70\%. Wild equids and ruminants decrease around 40\% of the time.
+
+\begin{figure}[p]
+\centering
+\includegraphics[scale=0.5]{both}
+\caption{The impact of a negative press perturbation on parasites of domestic ruminants and equids together. Dark grey = positive response; light grey = negative response}
+\label{fig:both}
+\end{figure}
+
+I think the results so far are interesting because it is possible to see the difference in effect when two nodes are perturbed together compared to one at a time. Another interesting thing to note is that for the results presented here, in about 20\% of cases the node being pressed down actually increased due to the feedback loops within the system, this percentage was higher when both nodes were pressed at the same time. This shows the likelihood that the strategy will be effective, so will be an interesting result to examine further for each management strategy that I model. 
+
+\clearpage
+
+\bibliography{bibmanage}{}
+\bibliographystyle{jmb}
+
+\end{document}
