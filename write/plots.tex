@@ -1,16 +1,30 @@
+%%% make plots, then print them with reasonable ones together on the page
 
 
 
-barplot(t(as.matrix(results.fence$strategy1f[,3:5])),horiz=TRUE,beside=FALSE,cex.names=0.7,las=1)
+\documentclass[12pt]{article}
 
-barplot(t(as.matrix(results.nofence$strategy1[,3:5])),horiz=TRUE,beside=FALSE,cex.names=0.7,las=1)
+\usepackage{pdflscape}
+
+\usepackage{Sweave}
+\begin{document}
+\input{plots-concordance}
+\setkeys{Gin}{width=\textwidth}
 
 
 
 
-resp.plot <- t(as.matrix(cbind(resp$ppos,resp$pneg,resp$pzero)))
-dimnames(resp.plot) <- list(c("pos","neg","zero"),nodes)
+\begin{landscape}
+\begin{figure}
+\begin{center}
+\includegraphics{plots-fig}
+\end{center}
+\caption{Results of press perturbations}
+\label{fig:one}
+\end{figure}
+\end{landscape}
 
-# plot the responses
-barplot(resp.plot,cex.names=0.7,xlab="Proportion",horiz=TRUE,las=1)
-title("People/domestic ruminants suppression",line=3)
+Hello
+
+
+\end{document}
