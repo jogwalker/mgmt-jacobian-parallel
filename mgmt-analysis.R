@@ -93,7 +93,7 @@ mat.fenced <- mat.filtered
 mat.inverses.f <- mat.filtered
 unstable.f <- vector(length=dim(mat.filtered)[3])
 prop.conserved <- 0.5 #how much land for .w
-fence.efficacy <- 0.9 #how effective is the fence
+fence.efficacy <- 0.99 #how effective is the fence
 for (i in 1:dim(mat.filtered)[3]) {
   mat.fenced[,,i] <- buildFence(prop.conserved,fence.efficacy,mat.filtered[,,i],network)
   .stable <- filterMatrix(mat.fenced[,,i])
