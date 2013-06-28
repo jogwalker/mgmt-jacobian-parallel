@@ -21,6 +21,7 @@
 
 
 \begin{document}
+\SweaveOpts{concordance=TRUE}
 
 \title{Project 2: Optimal Management}
 \author{Josephine Walker}
@@ -38,7 +39,7 @@
 
 Communities at the border of Makgadikgadi Pans National Park in Botswana make up part of a social-ecological system which includes people, domestic animals, wild animals, parasites, plants, and other organisms. People interact with the rest of the system by raising livestock, planting crops, and applying management strategies such as building fences, using pesticides, or digging wells. At this point, decisions on the best methods for management are generally not based on economic outcomes. The goal of this project is to develop a way to conduct cost-benefit analyses for various management strategies that incorporates impacts for multiple players in the system - including conservation and tourism as well as livelihoods of the local people. The method I am currently using is called `qualitative modeling' and is based on \citet{Raymond2011, Dambacher2003}. The idea is to simulate an ecosystem and calculate the effect of increasing or decreasing certain populations and see what the new equilibrium will be. This is known as a press perturbation \citep{Bender1984}.
 
-The first step is to develop a network model of the ecosystem based on Lotka-Volterra interactions, incorporating uncertain links. Next, I subject simulations of this network to combinations of press perturbations which represent management strategies. The results of the press perturbations indicate whether certain nodes in the network are likely to increase or decrease following the perturbation. I plan to conduct interviews with communities and government officials in Botswana to estimate how certain aspects of the system or certain nodes are valued compared to others. I will then incorporate these results into cost-benefit equations that incorporate implications for conservation as well as the needs of the communities. In this way, management strategies can be compared based on their predicted cost-benefit ratio, as well as the uncertainty of the outcome for each node. 
+The first step is to develop a conceptual network model of the ecosystem based on Lotka-Volterra interactions, incorporating uncertain links. Next, I subject simulations of this network to combinations of press perturbations which represent management strategies. The results of the press perturbations indicate whether certain nodes in the network are likely to increase or decrease following the perturbation. I plan to conduct interviews with communities and government officials in Botswana to estimate how certain aspects of the system or certain nodes are valued compared to others. I will then incorporate these results into cost-benefit equations that incorporate implications for conservation as well as the needs of the communities. In this way, management strategies can be compared based on their predicted cost-benefit ratio, as well as the uncertainty of the outcome for each node. 
  
 
 
@@ -66,9 +67,9 @@ Each element of \textbf{A}, $a_{ij}$, therefore represents the effect of changes
 %\paragraph{}
 The values of each individual parameter $p_{k}$ in the Lotka-Volterra equations or each $a_{ij}$ in \textbf{A} are not known, but the results of the model are likely to be highly sensitive to the values chosen \citep{Hosack2008}. Instead of defining values, I defined the biological class of interaction for each cell in the matrix (for example: predator, prey, competition) in order to decide whether $a_{ij}$ will be positive or negative  (Table \ref{tab:network}). This is one sense in which the model is 'qualitative'.
 
-<<setup, cache=TRUE,echo=FALSE,results='hide'>>=
+<<setup, cache=TRUE,echo=FALSE,results=hide>>=
 require(xtable)
-load("C:/Users/Josephine/Dropbox/Dropbox Documents/Bristol_PhD/R/write/network.rdata")
+load("O:/Bristol_PhD/R/mgmt-jacobian-parallel/network.rdata")
 netmat <- network
 rownames(network) <- c("Water","Grass","Trees","Crops","Domestic Ruminants","Domestic Equids","Wild Ruminants","Wild Equids", "Parasites Dom Eq","Parasites Wild Eq","Parasites Dom Rum", "Parasites Wild Rum","Infectious Eq Par","Infectious Rum Par", "Carnivores","Elephants","People")
 colnames(network) <- rownames(network)
@@ -90,7 +91,7 @@ colnames(network) <- paste("\\rot{", colnames(network), "}", sep="")
 % # 
 % # @
 
-<<methods-1, cache=TRUE, results='asis',echo=FALSE >>=
+<<methods-1,cache=TRUE, echo=FALSE >>=
 print(xtable(network, caption="Defined interactions between nodes; ab = abiotic/incidental increase, uk = unknown, mu = mutualistic, pr = predator, py = prey, co = competition, dd = density-dependent (diagonal), na = none, in = incidental reduction", label="tab:network"), size="footnotesize", #include.colnames=FALSE,
       sanitize.colnames.function = identity,
       floating.environment="sidewaystable")
@@ -112,7 +113,11 @@ I defined the model to have 17 nodes representing relevant groups of organisms i
 
 This is based on the approach taken by \citet{Raymond2011} in their assessment of the impact of eradication of invasive species on Macquarie Island. They define their network in a similar manner and go on to simulate values for each $a_{ij}$. First, in order to deal with unknown links, they look at each possible combination of \emph{x} unknown links existing or not ($2^{x}$), and simulate 1000 Lyapunov stable (stable around equilibrium, all real parts of eigenvalues are negative) values for \textbf{A} for each combination, resulting in 131 million matrices. Lyapunov stability indicates that the equilibrium point is locally stable such that the abundance of each node is positive; in other words, unstable systems are extinction prone. In addition, the determinant of the matrix must be negative, because a system with a positive determinant is unstable, and a zero determinant means the matrix is singular (non-invertible) and `neutrally stable'. Neutral stability means there is no local attractor so instead of having a stable equilibrium the system is controlled by exogenous input and will have multiple solutions \citep{Dambacher2002}.
 
-Instead of taking the approach  of \citet{Raymond2011}, which leads to equal weighting of each combination regardless of the likelihood of that combination yielding a stable matrix, I simulate values so that each unknown has an equal probability of being negative, zero, or positive. Various changes to how each $a_{ij}$ is chosen makes it more or less likely that a simulated \textbf{A} will be stable, but in general many iterations are necessary to reach a large number of stable simulations (25+ unstable matrices generated per stable matrix). At the moment all random values $a_{ij}$ are drawn from a uniform distribution, with $|a_{ij}| < 1$. 
+Instead of taking the approach  of \citet{Raymond2011}, which leads to equal weighting of each combination regardless of the likelihood of that combination yielding a stable matrix, I use a two step approach to simulate unknown values. For each iteration of the network, I first sample a number from a uniform distribution between 0 and 1 to determine the proportion of unknown links that are 0, this is used as p in a binomial distribution. This binomial distribution is sampled for each of the unknown links, those that are chosen to be non-zero then have a value simulated from a gamma(0.5,1) distribution, and half of the non-zero values are randomly chosen to be negative (by sampling from another binomial distribution).  Various changes to how each $a_{ij}$ is chosen makes it more or less likely that a simulated \textbf{A} will be stable, but in general many iterations are necessary to reach a large number of stable simulations. At the moment all random values $a_{ij}$ are drawn from a gamma(-.5,1) distribution, which means $|a_{ij}|$ is most likely to be $ < 1 $.
+
+<<gamma,fig=TRUE,echo=TRUE>>=
+hist(rgamma(1000,0.5,1))
+@
 
 \citet{Raymond2011} also use additional selection criteria besides stability to narrow down their modelled matrices. These criteria are based on what they know happened when cats were removed from the island. At the moment I don't have any known responses to check my networks against.
 

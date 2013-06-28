@@ -8,18 +8,18 @@
 
 \begin{document}
 \SweaveOpts{concordance=TRUE}
-\setkeys{Gin}{width=\textwidth}
+\setkeys{Gin}{width=1.5\textwidth}
 
 
 <<load, cache=TRUE,echo=FALSE,results=hide>>=
 library(ggplot2)
 library(plyr)
-library(reshape)
+library(reshape2)
 
-load("O:/Bristol_PhD/R/mgmt-jacobian-parallel/analysis/summary_2013-06-27.Rdata")
+load("O:/Bristol_PhD/R/mgmt-jacobian-parallel/analysis/summary_2013-06-28.Rdata")
 
-load("O:/Bristol_PhD/R/mgmt-jacobian-parallel/analysis/mat_all_fenced_2013-06-27.Rdata")
-load("O:/Bristol_PhD/R/mgmt-jacobian-parallel/analysis/fence_press_results_2013-06-27.Rdata")
+load("O:/Bristol_PhD/R/mgmt-jacobian-parallel/analysis/mat_all_fenced_2013-06-28.Rdata")
+load("O:/Bristol_PhD/R/mgmt-jacobian-parallel/analysis/fence_press_results_2013-06-28.Rdata")
 dat1 <- melt(results.fence$strategy1f)
 dat1$strategy <- 1
 dat1$fence <- "FENCED"
@@ -36,8 +36,8 @@ dat5 <- melt(results.fence$strategy5f)
 dat5$strategy <- 5
 dat5$fence <- "FENCED"
 
-load("O:/Bristol_PhD/R/mgmt-jacobian-parallel/analysis/mat_all_2013-06-27.Rdata")
-load("O:/Bristol_PhD/R/mgmt-jacobian-parallel/analysis/press_results_2013-06-27.Rdata")
+load("O:/Bristol_PhD/R/mgmt-jacobian-parallel/analysis/mat_all_2013-06-28.Rdata")
+load("O:/Bristol_PhD/R/mgmt-jacobian-parallel/analysis/press_results_2013-06-28.Rdata")
 
 dat6 <- melt(results.nofence$strategy1)
 dat6$strategy <- 1
@@ -59,28 +59,54 @@ names(dat) <- c("node","variable", "proportion", "strategy", "fence")
 dat$node <- as.factor(dat$node)
 m <- c("increase","decrease","nochange")
 dat.bar <- subset(dat,variable %in% m)
-
+m2 <- c("pq0", "pq25", "pq50", "pq75", "pq100","nq0", "nq25", "nq50", "nq75", "nq100")
+dat.box <- subset(dat,variable %in% m2) 
+dat.box$variable <- factor(dat.box$variable)
+dat.box$sign <- "p"
+dat.box$sign[which(dat.box$value < 0)] <- "n"
+levels(dat.box$variable) <-   c("q0","q25","q50","q75","q100","q0","q25","q50","q75","q100") 
+dat.box <- dcast(dat.box,node + fence + strategy + sign ~ variable)
 @
 
-<<plot,echo=FALSE,include=FALSE>>=
-
+<<figs,echo=FALSE,include=FALSE>>=
 p <- ggplot(dat.bar, aes(y=proportion, x=node)) + 
      geom_bar(stat="identity", aes(fill=variable), position="stack") +
      coord_flip() + 
      facet_grid(fence ~ strategy) +
-     opts(legend.position = "bottom",aspect.ratio=1)
+     theme(legend.position = "bottom")
+
+p2 <- ggplot(dat.box, aes(x=node)) +
+     geom_boxplot(stat="identity", aes(ymin=q0, lower=q25, middle=q50, upper=q75, ymax=q100)) +
+     facet_grid(fence ~ strategy) +
+     theme(legend.position = "bottom") +
+     coord_flip()
 @
 
 \begin{landscape}
 \begin{figure}
 \begin{center}
-<<label=fig,fig=TRUE,echo=FALSE>>=
-print(p)
+<<label=fig,fig=TRUE,echo=FALSE,width=15,height=10>>=
+p
 @
 \end{center}
 \caption{Results of press perturbations}
 \label{fig:one}
 \end{figure}
+
+
+\begin{figure}
+\begin{center}
+<<label=fig2,fig=TRUE,echo=FALSE,width=20>>=
+p2
+@
+\end{center}
+\caption{Box plots}
+\label{fig:two}
+\end{figure}
+
+
+
+
 \end{landscape}
 
 Hello

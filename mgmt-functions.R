@@ -167,6 +167,7 @@ buildFence <- function(prop.conserved,fence.efficacy,matrix,network) {
     }
   
   # scale interactions with infectious parasites by f and pw,pd?
+  
 
   # increases density - would building fence increase density? 
   return(mat)
