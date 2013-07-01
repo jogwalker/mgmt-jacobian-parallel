@@ -21,7 +21,11 @@
 
 
 \begin{document}
-\SweaveOpts{concordance=FALSE}
+
+<<include=FALSE>>=
+opts_chunk$set(concordance=FALSE)
+@
+
 
 
 \title{Project 2: Optimal Management}
@@ -70,7 +74,7 @@ The values of each individual parameter $p_{k}$ in the Lotka-Volterra equations 
 % (Table \ref{tab:network}). 
 This is one sense in which the model is 'qualitative'.
 
-<<setup, cache=TRUE,echo=FALSE,results=hide>>=
+<<setup, cache=TRUE,warning=FALSE, echo=FALSE,results='hide'>>=
 require(xtable)
 load("O:/Bristol_PhD/R/mgmt-jacobian-parallel/network.rdata")
 #load("~/Bristol_PhD/R/mgmt-jacobian-parallel/network.rdata")
@@ -96,7 +100,7 @@ colnames(network) <- paste("\\rot{", colnames(network), "}", sep="")
 % 
 
 
-<<methods-1,echo=FALSE, results=tex>>=
+<<methods-1,echo=FALSE, results='asis'>>=
 print(xtable(network, caption="Defined interactions between nodes; ab = abiotic/incidental increase, uk = unknown, mu = mutualistic, pr = predator, py = prey, co = competition, dd = density-dependent (diagonal), na = none, in = incidental reduction", label="tab:network"), size="footnotesize", include.colnames=TRUE,
 sanitize.colnames.function = identity,
 floating.environment="sidewaystable")
@@ -122,7 +126,7 @@ Instead of taking the approach  of \citet{Raymond2011}, which leads to equal wei
 
 \begin{figure}
 \begin{center}
-<<gamma,fig=TRUE,echo=TRUE>>=
+<<gamma,echo=TRUE>>=
 hist(rgamma(1000,0.5,1))
 @
 \end{center}
